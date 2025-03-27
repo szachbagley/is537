@@ -170,7 +170,6 @@ function fillTree(node, currentDepth, maxHeight) {
 }
 
 function getLevel(root, level, values = []) {
-  convertToCompleteBinaryTree(root);
   if (!root) return values;
   if (level === 0) {
     values.push(root.value);
@@ -181,33 +180,35 @@ function getLevel(root, level, values = []) {
   return values;
 }
 
-function levels(root) {
-  getAllLevels(root, 1, getMaxHeight(root));
+function getAllLevels(root) {
+  convertToCompleteBinaryTree(root);
+  const height = getMaxHeight(root);
+  let levels = {};
+  for (let level = height - 1; level >= 0; level--) {
+    levels[level] = getLevel(root, level, []);
+  }
+  return levels;
 }
 
-function getAllLevels(node, currentDepth, targetDepth, levels = []) {
-  if (node) {
-    if (targetDepth <= 0) {
-      return levels;
-    }
-    if (currentDepth < targetDepth) {
-      getAllLevels(node.left, currentDepth + 1, targetDepth);
-      getAllLevels(node.right, currentDepth + 1, targetDepth);
-    } else if (currentDepth == targetDepth) {
-      levels.push(getLevel(currentDepth));
-    }
-
-    getAllLevels(node, currentDepth, targetDepth--, levels);
+function prettyPrint(root) {
+  tree = getAllLevels(root);
+  for (let level in tree) {
   }
 }
 
 const tree = new BinaryTree();
-for (let i = 0; i < 50; i++) {
-  const value = Math.floor(Math.random() * 100);
+for (let i = 0; i < 10; i++) {
+  const value = Math.floor(Math.random() * 40);
   tree.insert(value);
 }
 
 console.log(tree);
+
+console.log("Level 0:");
+console.log(getLevel(tree.root, 0));
+
+console.log("Level 1:");
+console.log(getLevel(tree.root, 1));
 
 console.log("Level 3:");
 console.log(getLevel(tree.root, 3));
