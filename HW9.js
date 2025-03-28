@@ -190,6 +190,17 @@ function getAllLevels(root) {
   return levels;
 }
 
+function formatValue(val) {
+  let str = String(val);
+  if (str.length > 3) {
+    str = str.slice(0, 3);
+  }
+  while (str.length < 3) {
+    str = str + "_";
+  }
+  return str;
+}
+
 function prettyPrint(root) {
   tree = getAllLevels(root);
   for (let level in tree) {
