@@ -169,23 +169,23 @@ function fillTree(node, currentDepth, maxHeight) {
   }
 }
 
-function getLevel(root, level, values = []) {
-  if (!root) return values;
+function getLevel(root, level, nodes = []) {
+  if (!root) return nodes;
   if (level === 0) {
-    values.push(root.value);
+    nodes.push(root);
   } else {
-    getLevel(root.left, level - 1, values);
-    getLevel(root.right, level - 1, values);
+    getLevel(root.left, level - 1, nodes);
+    getLevel(root.right, level - 1, nodes);
   }
-  return values;
+  return nodes;
 }
 
 function getAllLevels(root) {
   convertToCompleteBinaryTree(root);
   const height = getMaxHeight(root);
-  let levels = {};
-  for (let level = height - 1; level >= 0; level--) {
-    levels[level] = getLevel(root, level, []);
+  let levels = [];
+  for (let level = 0; level < height; level++) {
+    levels.push(getLevel(root, level, []));
   }
   return levels;
 }
@@ -195,15 +195,111 @@ function formatValue(val) {
   if (str.length > 3) {
     str = str.slice(0, 3);
   }
-  while (str.length < 3) {
-    str = str + "_";
+
+  if (str.length == 0) {
+    str = "   ";
+  } else if (str.length == 1) {
+    str = " " + str + " ";
+  } else if (str.length == 2) {
+    str = " " + str;
   }
+  // while (str.length < 3) {
+  //   str = str + "_";
+  // }
   return str;
 }
 
 function prettyPrint(root) {
-  tree = getAllLevels(root);
+  console.log("Step 2 -- prettyPrint():")
+  console.log("\n");
+  let tree = getAllLevels(root);
+  let height = getMaxHeight(root);
   for (let level in tree) {
+    let levelStr = "";
+    for (let i = 0; i < ((2 ** height) - 2); i++) {
+      levelStr = levelStr + " ";
+    }
+    for (let i = 0; i < tree[level].length; i++) {
+      let valStr = formatValue(tree[level][i].value);
+      levelStr = levelStr + valStr;
+      if (i != tree[level].length - 1) {
+        for (let i = 0; i < (2 ** (height + 1)) - 3; i++) {
+          levelStr = levelStr + " ";
+        }
+      }
+      
+    }
+    console.log(levelStr);
+    height--;
+  }
+}
+
+function prettyPrintV2(root) {
+  console.log("Step 3 -- prettyPrintV2():");
+  console.log("\n");
+  let tree = getAllLevels(root);
+  let initHeight = getMaxHeight(root);
+  let height = initHeight;
+  for (let level in tree) {
+    let levelStr = "";
+    let lineStr = "";
+    let endPair = false;
+    
+    let leadSpaces = (2 ** height) - 2;
+    for (let i = 0; i < leadSpaces; i++) {
+      levelStr += " ";
+      lineStr += " ";
+    }
+    
+    for (let i = 0; i < tree[level].length; i++) {
+      let node = tree[level][i];
+      let exists = true;
+      let nextExists = false;
+      let valStr = formatValue(node.value);
+
+      levelStr += valStr;
+      if (valStr == "   ") { exists = false; }
+      if (i < tree[level].length - 1) {
+        let next = tree[level][i + 1];
+        if (next.value != '') {
+          nextExists = true;
+        }
+      }
+      if (!endPair && exists) {
+        lineStr += " ┌─";
+      } else if (exists) {
+        lineStr += "─┐ ";
+      } else {
+        lineStr += "   ";
+      }
+      
+      if (i !== tree[level].length - 1) {
+        let betweenCount = (2 ** (height + 1)) - 3;
+        for (let j = 0; j < betweenCount; j++) {
+          levelStr += " ";
+          if (!endPair) {
+            if (j === Math.floor(betweenCount / 2) && (exists || nextExists)) {
+              lineStr += "┴";
+            } else if (exists && j < Math.floor(betweenCount / 2)) {
+              lineStr += "─";
+            } else if (nextExists && j > Math.floor(betweenCount / 2)) {
+              lineStr += "─";
+            } else {
+              lineStr += " ";
+            }
+          } else {
+            lineStr += " ";
+          }
+        }
+      }
+      
+      endPair = !endPair;
+    }
+    if (height !== initHeight) {
+      console.log(lineStr);
+    }
+    console.log(levelStr);
+    height--;
   }
 }
 
@@ -213,19 +309,19 @@ for (let i = 0; i < 10; i++) {
   tree.insert(value);
 }
 
-console.log(tree);
+// const tree = new BinaryTree();
+// tree.insert(5);
+// tree.insert(9);
+// tree.insert(2);
+// tree.insert(3);
+// tree.insert(8);
+// tree.insert(6);
+// tree.insert(7);
+// tree.insert(4);
+// tree.insert(1);
+// tree.insert(0);
 
-console.log("Level 0:");
-console.log(getLevel(tree.root, 0));
-
-console.log("Level 1:");
-console.log(getLevel(tree.root, 1));
-
-console.log("Level 3:");
-console.log(getLevel(tree.root, 3));
-
-console.log("Level 4:");
-console.log(getLevel(tree.root, 4));
-
-console.log("The tree:");
-console.log(getAllLevels(tree.root));
+console.log("\n");
+prettyPrint(tree.root);
+console.log("\n");
+prettyPrintV2(tree.root);
